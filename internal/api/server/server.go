@@ -6,12 +6,13 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"sync"
 
 	"github.com/Grealish17/parvpo/internal/model"
 )
 
 type service interface {
-	Buy(context.Context, *model.BuyTicketRequest) (*model.BuyTicketResponse, error)
+	Buy(context.Context, *model.BuyTicketRequest) error
 }
 
 type Server struct {
@@ -23,6 +24,9 @@ func NewServer(service service) Server {
 		service: service,
 	}
 }
+
+var respChans = make(map[uint64]chan model.Message)
+var mu sync.RWMutex
 
 func (s *Server) Buy(w http.ResponseWriter, req *http.Request) {
 	body, err := io.ReadAll(req.Body)
@@ -44,16 +48,41 @@ func (s *Server) Buy(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	resp, err := s.service.Buy(req.Context(), &ticket)
+	mu.Lock()
+	respChans[ticket.ID] = make(chan model.Message)
+	mu.Unlock()
+
+	err = s.service.Buy(req.Context(), &ticket)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write(nil)
+		return
+	}
+
+	mu.RLock()
+	rm := <-respChans[ticket.ID]
+	mu.RUnlock()
+
+	if rm.UserEmail == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("This ticket has already been bought"))
+		return
+	}
+
+	resp := &model.BuyTicketResponse{
+		ID:        rm.ID,
+		UserEmail: rm.UserEmail,
+		Price:     rm.Price,
+		HomeTeam:  rm.HomeTeam,
+		AwayTeam:  rm.AwayTeam,
+		DateTime:  rm.DateTime,
 	}
 
 	data, err := json.Marshal(resp)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write(nil)
+		return
 	}
 
 	w.WriteHeader(http.StatusOK)

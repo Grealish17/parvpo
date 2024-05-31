@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/Grealish17/parvpo/internal/server"
+	"github.com/Grealish17/parvpo/internal/api/server"
 
 	"github.com/gorilla/mux"
 )

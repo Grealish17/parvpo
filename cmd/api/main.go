@@ -7,12 +7,13 @@ import (
 	"net/http"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/Grealish17/parvpo/infrastructure/kafka"
-	"github.com/Grealish17/parvpo/internal/routes"
+	"github.com/Grealish17/parvpo/internal/api/routes"
+	"github.com/Grealish17/parvpo/internal/api/server"
+	"github.com/Grealish17/parvpo/internal/api/service"
 	"github.com/Grealish17/parvpo/internal/sender"
-	"github.com/Grealish17/parvpo/internal/server"
-	"github.com/Grealish17/parvpo/internal/service"
 )
 
 const (
@@ -21,20 +22,22 @@ const (
 
 var brokers = []string{
 	"127.0.0.1:9091",
-	"127.0.0.1:9092",
-	"127.0.0.1:9093",
+	"127.0.0.1::9092",
+	"127.0.0.1::9093",
 }
 
 func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 
+	time.Sleep(30 * time.Second)
+
 	kafkaProducer, err := kafka.NewProducer(brokers, kafka.WithMaxOpenRequests(1), kafka.WithRandomPartitioner(), kafka.WaitForAll(),
 		kafka.ReturnSuccesses(true), kafka.ReturnErrors(true), kafka.Idempotent(true), kafka.WithCompressionLevelDefault(), kafka.WithCompressionGZIP())
 	if err != nil {
 		fmt.Println(err)
 	}
-	sender := sender.NewKafkaSender(kafkaProducer, "logs")
+	sender := sender.NewKafkaSender(kafkaProducer, "requests")
 
 	serv := service.NewService(sender)
 

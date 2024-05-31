@@ -20,7 +20,7 @@ prod-migration-down:
 
 .PHONY: .prod-dc-up
 prod-dc-up:
-	sudo docker-compose up -d zookeeper kafka1 kafka2 kafka3
+	sudo docker-compose up -d postgres zookeeper kafka1 kafka2 kafka3
 
 .PHONY: .prod-dc-stop
 prod-dc-stop:
@@ -29,3 +29,13 @@ prod-dc-stop:
 .PHONY: .prod-dc-down
 prod-dc-down:
 	sudo docker-compose down
+
+.PHONY: run-api
+run-api:
+	go build -o api.exe ./cmd/api
+	sudo ./api.exe
+
+.PHONY: run-app
+run-app:
+	go build -o app.exe ./cmd/app
+	sudo ./app.exe

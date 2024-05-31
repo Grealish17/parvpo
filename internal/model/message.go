@@ -2,7 +2,7 @@ package model
 
 import "time"
 
-type RequestMessage struct {
+type Message struct {
 	ID        uint64
 	UserEmail string
 	Price     uint64

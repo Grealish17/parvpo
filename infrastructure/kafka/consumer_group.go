@@ -3,7 +3,6 @@ package kafka
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 
 	"github.com/Grealish17/parvpo/internal/model"
 
@@ -11,12 +10,14 @@ import (
 )
 
 type ConsumerGroup struct {
-	ready chan bool
+	ready   chan bool
+	msgChan chan<- model.Message
 }
 
-func NewConsumerGroup() ConsumerGroup {
+func NewConsumerGroup(msgChan chan<- model.Message) ConsumerGroup {
 	return ConsumerGroup{
-		ready: make(chan bool),
+		ready:   make(chan bool),
+		msgChan: msgChan,
 	}
 }
 
@@ -39,23 +40,17 @@ func (consumer *ConsumerGroup) ConsumeClaim(session sarama.ConsumerGroupSession,
 		select {
 		case message := <-claim.Messages():
 
-			pm := model.RequestMessage{}
-			err := json.Unmarshal(message.Value, &pm)
+			rm := model.Message{}
+			err := json.Unmarshal(message.Value, &rm)
 			if err != nil {
 				fmt.Println("Consumer group error", err)
 			}
 
-			log.Println(
-				pm.ID,
-				pm.UserEmail,
-				pm.Price,
-				pm.HomeTeam,
-				pm.AwayTeam,
-				pm.DateTime,
-			)
+			consumer.msgChan <- rm
 
 			session.MarkMessage(message, "")
 		case <-session.Context().Done():
+			close(consumer.msgChan)
 			return nil
 		}
 	}

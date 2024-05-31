@@ -1,4 +1,4 @@
-package logger
+package receiver
 
 import (
 	"context"
@@ -10,11 +10,12 @@ import (
 	"time"
 
 	"github.com/Grealish17/parvpo/infrastructure/kafka"
+	"github.com/Grealish17/parvpo/internal/model"
 
 	"github.com/IBM/sarama"
 )
 
-func ConsumerGroupLogging(brokers []string) {
+func ConsumerGroupLogging(brokers []string, topic string, msgChan chan<- model.Message) {
 	keepRunning := true
 	log.Println("Starting a new Sarama consumer")
 
@@ -43,8 +44,8 @@ func ConsumerGroupLogging(brokers []string) {
 		log.Panicf("Unrecognized consumer group partition assignor: %s", BalanceStrategy)
 	}
 
-	consumer := kafka.NewConsumerGroup()
-	group := "logs-group"
+	consumer := kafka.NewConsumerGroup(msgChan)
+	group := topic + "-group"
 
 	ctx, cancel := context.WithCancel(context.Background())
 	client, err := sarama.NewConsumerGroup(brokers, group, config)
@@ -58,7 +59,7 @@ func ConsumerGroupLogging(brokers []string) {
 	go func() {
 		defer wg.Done()
 		for {
-			if err := client.Consume(ctx, []string{"logs"}, &consumer); err != nil {
+			if err := client.Consume(ctx, []string{topic}, &consumer); err != nil {
 				log.Panicf("Error from consumer: %v", err)
 			}
 			if ctx.Err() != nil {

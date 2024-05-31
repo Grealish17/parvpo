@@ -1,20 +1,22 @@
 version: "3.3"
 
-networks:
-  net:
-    driver: bridge
-
 services:
   postgres:
     image: postgres:13
+    container_name: postgres
+    restart: always
     environment:
       POSTGRES_DB: prod
       POSTGRES_USER: user
       POSTGRES_PASSWORD: pass
     ports:
       - "8002:5432"
+    networks:
+      - net
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
+    container_name: zookeeper
+    restart: always
     environment:
       ZOOKEEPER_SERVER_ID: 1
       ZOOKEEPER_TICK_TIME: 2000
@@ -31,8 +33,12 @@ services:
       - "2181:2181"
       - "2888:2888"
       - "3888:3888"
+    networks:
+      - net
   kafka1:
     image: confluentinc/cp-kafka:latest
+    container_name: kafka1
+    restart: always
     healthcheck:
       test: ps augwwx | egrep [S]upportedKafka
     depends_on:
@@ -47,8 +53,12 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTNER_INT:PLAINTEXT,LISTENER_EXT:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: LISTNER_INT
       ZOOKEEPER: zookeeper:2181
+    networks:
+      - net
   kafka2:
     image: confluentinc/cp-kafka:latest
+    container_name: kafka2
+    restart: always
     healthcheck:
       test: ps augwwx | egrep [S]upportedKafka
     depends_on:
@@ -63,8 +73,12 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTNER_INT:PLAINTEXT,LISTENER_EXT:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: LISTNER_INT
       ZOOKEEPER: zookeeper:2181
+    networks:
+      - net
   kafka3:
     image: confluentinc/cp-kafka:latest
+    container_name: kafka3
+    restart: always
     healthcheck:
       test: ps augwwx | egrep [S]upportedKafka
     depends_on:
@@ -79,3 +93,26 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTNER_INT:PLAINTEXT,LISTENER_EXT:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: LISTNER_INT
       ZOOKEEPER: zookeeper:2181
+    networks:
+      - net
+
+  api:
+    container_name: api
+    build: 
+      context: ./
+      dockerfile: ./Dockerfile
+    restart: always
+    depends_on:
+      - kafka1
+      - kafka2
+      - kafka3
+      - postgres
+      - zookeeper
+    ports:
+      - "9000:9000"
+    networks:
+      - net
+
+networks:
+  net:
+    driver: bridge

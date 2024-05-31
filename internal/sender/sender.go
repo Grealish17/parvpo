@@ -25,7 +25,7 @@ func NewKafkaSender(producer producer, topic string) *KafkaSender {
 	}
 }
 
-func (s *KafkaSender) SendMessage(message model.RequestMessage) error {
+func (s *KafkaSender) SendMessage(message model.Message) error {
 	kafkaMsg, err := s.buildMessage(message)
 	if err != nil {
 		fmt.Println("Send message marshal error", err)
@@ -42,7 +42,7 @@ func (s *KafkaSender) SendMessage(message model.RequestMessage) error {
 	return nil
 }
 
-func (s *KafkaSender) buildMessage(message model.RequestMessage) (*sarama.ProducerMessage, error) {
+func (s *KafkaSender) buildMessage(message model.Message) (*sarama.ProducerMessage, error) {
 	msg, err := json.Marshal(message)
 
 	if err != nil {
