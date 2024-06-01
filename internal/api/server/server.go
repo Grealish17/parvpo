@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"sync"
+	"time"
 
 	"github.com/Grealish17/parvpo/internal/model"
 )
@@ -59,8 +60,19 @@ func (s *Server) Buy(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	var rm model.Message
 	mu.RLock()
-	rm := <-respChans[ticket.ID]
+	select {
+	case rm = <-respChans[ticket.ID]:
+		break
+	case <-time.After(5 * time.Second):
+		mu.RUnlock()
+		if rm.UserEmail == "" {
+			w.WriteHeader(http.StatusServiceUnavailable)
+			w.Write([]byte("Oops, something went wrong"))
+			return
+		}
+	}
 	mu.RUnlock()
 
 	if rm.UserEmail == "" {

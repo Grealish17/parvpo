@@ -10,32 +10,22 @@ MIGRATION_FOLDER=$(INTERNAL_PKG_PATH)/migrations
 migration-create:
 	goose -dir "$(MIGRATION_FOLDER)" create "$(name)" sql
 
-.PHONY: .prod-migration-up
-prod-migration-up:
+.PHONY: .migration-up
+migration-up:
 	goose -dir "$(MIGRATION_FOLDER)" postgres "$(POSTGRES_SETUP_PROD)" up
 
-.PHONY: .prod-migration-down
-prod-migration-down:
+.PHONY: .migration-down
+migration-down:
 	goose -dir "$(MIGRATION_FOLDER)" postgres "$(POSTGRES_SETUP_PROD)" down
 
-.PHONY: .prod-dc-up
-prod-dc-up:
+.PHONY: .dc-up
+dc-up:
 	sudo docker-compose up -d postgres zookeeper kafka1 kafka2 kafka3
 
-.PHONY: .prod-dc-stop
-prod-dc-stop:
+.PHONY: .dc-stop
+dc-stop:
 	sudo docker-compose stop
 
-.PHONY: .prod-dc-down
-prod-dc-down:
+.PHONY: .dc-down
+dc-down:
 	sudo docker-compose down
-
-.PHONY: run-api
-run-api:
-	go build -o api.exe ./cmd/api
-	sudo ./api.exe
-
-.PHONY: run-app
-run-app:
-	go build -o app.exe ./cmd/app
-	sudo ./app.exe

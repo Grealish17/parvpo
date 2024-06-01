@@ -1,6 +1,6 @@
 FROM golang:latest AS builder
 
-WORKDIR /app
+WORKDIR /project
 
 RUN export GO111MODULE=on
 
@@ -14,8 +14,8 @@ RUN CGO_ENABLED=0 go build -v -o ./api ./cmd/api
 
 FROM alpine:latest AS runner
 
-COPY --from=builder /app/api .
+COPY --from=builder /project/api .
 
-EXPOSE 9000 5432 9091 9092 9093
+EXPOSE 9000 9091 9092 9093
 
 CMD ["./api" ]

@@ -39,8 +39,6 @@ func runServer(ctx context.Context) error {
 		server.Distribute(msgChan)
 	}()
 
-	fmt.Println("START")
-
 	log.Printf("listening on %s", port)
 	<-ctx.Done()
 

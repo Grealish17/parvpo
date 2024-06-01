@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"github.com/Grealish17/parvpo/infrastructure/kafka"
 	"github.com/Grealish17/parvpo/internal/api/routes"
@@ -21,16 +20,14 @@ const (
 )
 
 var brokers = []string{
-	"127.0.0.1:9091",
-	"127.0.0.1::9092",
-	"127.0.0.1::9093",
+	"kafka1:9091",
+	"kafka2:9092",
+	"kafka3:9093",
 }
 
 func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
-
-	time.Sleep(30 * time.Second)
 
 	kafkaProducer, err := kafka.NewProducer(brokers, kafka.WithMaxOpenRequests(1), kafka.WithRandomPartitioner(), kafka.WaitForAll(),
 		kafka.ReturnSuccesses(true), kafka.ReturnErrors(true), kafka.Idempotent(true), kafka.WithCompressionLevelDefault(), kafka.WithCompressionGZIP())
