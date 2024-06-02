@@ -2,8 +2,8 @@ package kafka
 
 import (
 	"encoding/json"
-	"fmt"
 
+	"github.com/Grealish17/parvpo/infrastructure/logger"
 	"github.com/Grealish17/parvpo/internal/model"
 
 	"github.com/IBM/sarama"
@@ -43,7 +43,8 @@ func (consumer *ConsumerGroup) ConsumeClaim(session sarama.ConsumerGroupSession,
 			rm := model.Message{}
 			err := json.Unmarshal(message.Value, &rm)
 			if err != nil {
-				fmt.Println("Consumer group error", err)
+				//fmt.Println("Consumer group error", err)
+				logger.Error("Consumer group error", err)
 			}
 
 			consumer.msgChan <- rm

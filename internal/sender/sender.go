@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/Grealish17/parvpo/infrastructure/logger"
 	"github.com/Grealish17/parvpo/internal/model"
 	"github.com/IBM/sarama"
 )
@@ -28,14 +29,16 @@ func NewKafkaSender(producer producer, topic string) *KafkaSender {
 func (s *KafkaSender) SendMessage(message model.Message) error {
 	kafkaMsg, err := s.buildMessage(message)
 	if err != nil {
-		fmt.Println("Send message marshal error", err)
+		//fmt.Println("Send message marshal error", err)
+		logger.Error("Send message marshal error", err)
 		return err
 	}
 
 	_, _, err = s.producer.SendSyncMessage(kafkaMsg)
 
 	if err != nil {
-		fmt.Println("Send message connector error", err)
+		//fmt.Println("Send message connector error", err)
+		logger.Error("Send message connector error", err)
 		return err
 	}
 
@@ -46,7 +49,8 @@ func (s *KafkaSender) buildMessage(message model.Message) (*sarama.ProducerMessa
 	msg, err := json.Marshal(message)
 
 	if err != nil {
-		fmt.Println("Send message marshal error", err)
+		//fmt.Println("Send message marshal error", err)
+		logger.Error("Send message marshal error", err)
 		return nil, err
 	}
 

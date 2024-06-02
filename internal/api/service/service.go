@@ -2,8 +2,8 @@ package service
 
 import (
 	"context"
-	"fmt"
 
+	"github.com/Grealish17/parvpo/infrastructure/logger"
 	"github.com/Grealish17/parvpo/internal/model"
 )
 
@@ -32,7 +32,8 @@ func (s *Service) Buy(_ context.Context, ticket *model.BuyTicketRequest) error {
 	)
 
 	if err != nil {
-		fmt.Println("Api send sync message error: ", err)
+		//fmt.Println("Api send sync message error: ", err)
+		logger.Errorf("Api send sync message error: ", err)
 		return model.ErrSendReq
 	}
 

@@ -2,9 +2,8 @@ package server
 
 import (
 	"context"
-	"fmt"
-	"log"
 
+	"github.com/Grealish17/parvpo/infrastructure/logger"
 	"github.com/Grealish17/parvpo/internal/model"
 )
 
@@ -60,8 +59,10 @@ func (s *Server) Listen(ctx context.Context) {
 
 		err = s.sender.SendMessage(rm)
 		if err != nil {
-			fmt.Println("App send sync message error: ", err)
+			//fmt.Println("App send sync message error: ", err)
+			logger.Error("App send sync message error: ", err)
 		}
 	}
-	log.Println("App channel closed, exiting listen goroutine")
+	//log.Println("App channel closed, exiting listen goroutine")
+	logger.Info("App channel closed, exiting listen goroutine")
 }

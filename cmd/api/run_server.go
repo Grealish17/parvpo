@@ -3,10 +3,10 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"sync"
 
+	"github.com/Grealish17/parvpo/infrastructure/logger"
 	"github.com/Grealish17/parvpo/internal/api/server"
 	"github.com/Grealish17/parvpo/internal/model"
 	"github.com/Grealish17/parvpo/internal/receiver"
@@ -22,7 +22,8 @@ func runServer(ctx context.Context) error {
 
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatal(err)
+			//log.Fatal(err)
+			logger.Fatal(err)
 		}
 	}()
 
@@ -39,12 +40,14 @@ func runServer(ctx context.Context) error {
 		server.Distribute(msgChan)
 	}()
 
-	log.Printf("listening on %s", port)
+	//log.Printf("listening on %s", port)
+	logger.Infof("Listening on %s", port)
 	<-ctx.Done()
 
 	wg.Wait()
 
-	log.Println("shutting down server gracefully")
+	//log.Println("shutting down server gracefully")
+	logger.Info("Shutting down server gracefully")
 
 	shutdownCtx := context.Context(context.Background())
 

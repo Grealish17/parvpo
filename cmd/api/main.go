@@ -2,13 +2,12 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"log"
 	"net/http"
 	"os/signal"
 	"syscall"
 
 	"github.com/Grealish17/parvpo/infrastructure/kafka"
+	"github.com/Grealish17/parvpo/infrastructure/logger"
 	"github.com/Grealish17/parvpo/internal/api/routes"
 	"github.com/Grealish17/parvpo/internal/api/server"
 	"github.com/Grealish17/parvpo/internal/api/service"
@@ -26,13 +25,16 @@ var brokers = []string{
 }
 
 func main() {
+	defer logger.Sync()
+
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 
 	kafkaProducer, err := kafka.NewProducer(brokers, kafka.WithMaxOpenRequests(1), kafka.WithRandomPartitioner(), kafka.WaitForAll(),
 		kafka.ReturnSuccesses(true), kafka.ReturnErrors(true), kafka.Idempotent(true), kafka.WithCompressionLevelDefault(), kafka.WithCompressionGZIP())
 	if err != nil {
-		fmt.Println(err)
+		//mt.Println(err)
+		logger.Error(err)
 	}
 	sender := sender.NewKafkaSender(kafkaProducer, "requests")
 
@@ -43,7 +45,8 @@ func main() {
 	http.Handle("/", routes.CreateRouter(implemetation))
 
 	if err := runServer(ctx); err != nil {
-		log.Fatal(err)
+		//log.Fatal(err)
+		logger.Fatal(err)
 	}
 
 }

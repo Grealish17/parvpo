@@ -2,13 +2,12 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"log"
 	"os/signal"
 	"sync"
 	"syscall"
 
 	"github.com/Grealish17/parvpo/infrastructure/kafka"
+	"github.com/Grealish17/parvpo/infrastructure/logger"
 	"github.com/Grealish17/parvpo/internal/app/db"
 	"github.com/Grealish17/parvpo/internal/app/repository"
 	"github.com/Grealish17/parvpo/internal/app/server"
@@ -33,12 +32,15 @@ func main() {
 	defer cancel()
 	config, err := db.LoadEnv(envFile)
 	if err != nil {
-		log.Fatal(err)
+		//log.Fatal(err)
+		logger.Fatal(err)
 	}
+	logger.Debug("Load config from environmental")
 
 	database, err := db.NewDb(ctx, config)
 	if err != nil {
-		log.Fatal(err)
+		//log.Fatal(err)
+		logger.Fatal(err)
 	}
 	defer database.GetPool(ctx).Close()
 
@@ -51,7 +53,8 @@ func main() {
 	kafkaProducer, err := kafka.NewProducer(brokers, kafka.WithMaxOpenRequests(1), kafka.WithRandomPartitioner(), kafka.WaitForAll(),
 		kafka.ReturnSuccesses(true), kafka.ReturnErrors(true), kafka.Idempotent(true), kafka.WithCompressionLevelDefault(), kafka.WithCompressionGZIP())
 	if err != nil {
-		fmt.Println(err)
+		//fmt.Println(err)
+		logger.Error(err)
 	}
 	sender := sender.NewKafkaSender(kafkaProducer, "responses")
 

@@ -3,12 +3,12 @@ package server
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"sync"
 	"time"
 
+	"github.com/Grealish17/parvpo/infrastructure/logger"
 	"github.com/Grealish17/parvpo/internal/model"
 )
 
@@ -44,7 +44,8 @@ func (s *Server) Buy(w http.ResponseWriter, req *http.Request) {
 
 	var ticket model.BuyTicketRequest
 	if err = json.Unmarshal(body, &ticket); err != nil {
-		fmt.Println(err)
+		//fmt.Println(err)
+		logger.Error(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -70,6 +71,7 @@ func (s *Server) Buy(w http.ResponseWriter, req *http.Request) {
 		if rm.UserEmail == "" {
 			w.WriteHeader(http.StatusServiceUnavailable)
 			w.Write([]byte("Oops, something went wrong"))
+			logger.Warn("The timeout has triggered")
 			return
 		}
 	}
