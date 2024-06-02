@@ -8,10 +8,12 @@ import (
 
 	"github.com/Grealish17/parvpo/infrastructure/kafka"
 	"github.com/Grealish17/parvpo/infrastructure/logger"
+	redisCache "github.com/Grealish17/parvpo/infrastructure/redis"
 	"github.com/Grealish17/parvpo/internal/api/routes"
 	"github.com/Grealish17/parvpo/internal/api/server"
 	"github.com/Grealish17/parvpo/internal/api/service"
 	"github.com/Grealish17/parvpo/internal/sender"
+	"github.com/redis/go-redis/v9"
 )
 
 const (
@@ -40,7 +42,13 @@ func main() {
 
 	serv := service.NewService(sender)
 
-	implemetation := server.NewServer(serv)
+	client := redisCache.NewRedis(&redis.Options{
+		Addr:     "redis:6379",
+		Password: "password",
+		DB:       0,
+	})
+
+	implemetation := server.NewServer(serv, client)
 
 	http.Handle("/", routes.CreateRouter(implemetation))
 

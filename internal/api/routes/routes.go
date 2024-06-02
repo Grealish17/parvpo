@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -23,6 +24,16 @@ func CreateRouter(implemetation server.Server) *mux.Router {
 		default:
 			//log.Println("error")
 			logger.Warn("Default case in HandleFunc /tickets")
+		}
+	})
+
+	router.HandleFunc(fmt.Sprintf("/tickets/{%s:[0-9]+}", server.QueryParamId), func(w http.ResponseWriter, req *http.Request) {
+		switch req.Method {
+		case http.MethodGet:
+			implemetation.Get(w, req)
+		default:
+			//log.Println("error")
+			logger.Warn("Default case in HandleFunc /tickets/[0-9]+")
 		}
 	})
 

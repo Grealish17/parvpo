@@ -20,7 +20,7 @@ migration-down:
 
 .PHONY: .dc-up
 dc-up:
-	sudo docker-compose up -d postgres zookeeper kafka1 kafka2 kafka3
+	sudo docker-compose up -d postgres zookeeper kafka1 kafka2 kafka3 redis
 
 .PHONY: .dc-stop
 dc-stop:

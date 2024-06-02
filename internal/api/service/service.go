@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"time"
 
 	"github.com/Grealish17/parvpo/infrastructure/logger"
 	"github.com/Grealish17/parvpo/internal/model"
@@ -38,4 +39,27 @@ func (s *Service) Buy(_ context.Context, ticket *model.BuyTicketRequest) error {
 	}
 
 	return nil
+}
+
+func (s *Service) Get(_ context.Context, id uint64) (*model.ReadTicketResponse, error) {
+	time := time.Date(2024, time.May, 30, 0, 0, 0, 0, time.UTC)
+	ticket := model.Ticket{
+		ID:        id,
+		UserEmail: "mock@yandex.ru",
+		Price:     200,
+		HomeTeam:  "Barabella",
+		AwayTeam:  "Mifcar",
+		DateTime:  &time,
+	}
+
+	resp := &model.ReadTicketResponse{
+		ID:        ticket.ID,
+		UserEmail: ticket.UserEmail,
+		Price:     ticket.Price,
+		HomeTeam:  ticket.HomeTeam,
+		AwayTeam:  ticket.AwayTeam,
+		DateTime:  ticket.DateTime,
+	}
+
+	return resp, nil
 }
